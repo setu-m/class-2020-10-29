@@ -19,6 +19,7 @@ week_8 <- trains %>%
   
 ```
 
+$$\sum_{n=1}^{10} n^2$$
 Weeks 7, 8 and 9 are the core of the class. We have a question. We have some data. How should we use the data to answer the question? Using Wisdom, we first decide if the question and the data are "close enough" that we can consider them to both be part of the same population. With Justice, we create a mathematical model which describes the connection between the outcome we want to explain/understand an the covariates which might be connected to it. Courage takes us from mathematics to code, creating a model, including posterior distributions for all its parameters. The last step is to use that model to answer the question with which we started, with Temperance.
 
 **Question:** *What would Preceptor's change in attitude toward immigration be if he were to receive the treatment next week?*
@@ -31,16 +32,42 @@ $$ age_i = \beta_1 x_{r,i} + \beta_2 x_{d,i} + \epsilon_i$$
 Today, we will be considering `att_chg` as a function of `treatment`. 
 
 * Create the mathematical formula for that model here.
+we drop the intercept here; att_chg ~ treatment - 1
+$$ att\_chg_i = \beta_1 x_{t,i} + \beta_2 x_{c,i} + \epsilon_i$$
+```{r}
+fit_1 <- stan_glm(data = week_8,
+                att_chg ~ treatment,
+                refresh = 0)
+```
+
+
+intercept = mean value when all predictors is equal to 0
+att_chg ~ treatment
+$$ att\_chg_i = \beta_{int} + \beta_1 x_{treated,i} + \epsilon_i$$
 
 * Describe the ideal Preceptor Table.
+-ID column, att_chg (treated, control), within treatment/control have different times, today, tomorrow -> next week
 
 * Write a few sentences about whether or not our data will allow us to answer this question.
-
+-old data so it's hard
 
 
 ## Scene 2
 
 **Prompt:** There are two ways to interpret our question. The first involves our expectation. We can also think of this as the long-term average, if we did the same experiment over and over again. (Assume that Preceptor is always assigned to the treatment.) What is your posterior probability distribution for Preceptor's *expected* `att_chg`?
+
+```{r}
+fit <- stan_glm(data = week_8,
+                att_chg ~ treatment -1,
+                refresh = 0)
+fit %>%
+  as_tibble() %>%
+  mutate(ate = treatmentTreated - treatmentControl) %>%
+  ggplot(aes(x = treatmentTreated)) +
+  geom_histogram(aes(y = after_stat(count/sum(count))),
+                     bins = 50)
+```
+
 
 
 
